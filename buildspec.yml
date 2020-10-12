@@ -1,0 +1,37 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - aws s3 cp s3://shg-crm-build-dependencies/helm-v3.1.0-rc.3-linux-amd64.tar.gz .
+      - tar -zxvf helm-v3.1.0-rc.3-linux-amd64.tar.gz
+      - mv linux-amd64/helm /usr/local/bin/helm
+      - helm plugin install https://github.com/hypnoglow/helm-s3.git
+      - helm repo add private $CHART_REPOSITORY_URL
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email)
+      - ECR_REPOSITORY_URI=$ECR_REGISTRY_URL/shg-crm-loyalty-api
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - CHART_NAME=$(grep 'name:' chart/Chart.yaml | tail -n1 | awk '{ print $2}')
+      - CHART_VERSION=$(grep 'version:' chart/Chart.yaml | tail -n1 | awk '{ print $2}')
+      - IMAGE_TAG=$env_name-$(grep 'appVersion:' chart/Chart.yaml | tail -n1 | awk '{ print $2}')
+      - HELM_PACKAGE_NAME=$CHART_NAME-$CHART_VERSION.tgz
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t $ECR_REPOSITORY_URI:$IMAGE_TAG .
+      - helm package ./chart
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
+      - helm s3 push $HELM_PACKAGE_NAME private --force
+      - echo "{\"env_name\":\"$env_name\", \"service_name\":\"$service_name\"}" > deploy_params.json
+artifacts:
+  files:
+    - deploy_params.json
+  discard-paths: yes

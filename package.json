@@ -1,0 +1,43 @@
+{
+  "name": "shg-crm-apigateway",
+  "version": "1.0.0",
+  "description": "api gateway",
+  "main": "server.js",
+  "scripts": {
+    "local": "cross-env ENV_NAME=local PORT=5000  nodemon ./server.js",
+    "dev": "cross-env ENV_NAME=dev PORT=5000  nodemon ./server.js",
+    "uat": "cross-env ENV_NAME=uat  nodemon ./server.js",
+    "prod": "cross-env ENV_NAME=prod  nodemon ./server.js",
+    "start": "pm2 start ./app.json",
+    "stop": "pm2 stop server",
+    "restart": "pm2 restart ./app.json",
+    "reload": "pm2 reload ./app.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jmpg",
+  "license": "ISC",
+  "dependencies": {
+    "amazon-cognito-identity-js": "^3.2.2",
+    "aws-sdk": "^2.610.0",
+    "axios": "^0.19.2",
+    "body-parser": "^1.19.0",
+    "cross-env": "^7.0.2",
+    "express": "^4.17.1",
+    "ip": "^1.1.5",
+    "jsonwebtoken": "^8.5.1",
+    "jwk-to-pem": "^2.0.3",
+    "log-master": "^1.0.0",
+    "mysql": "^2.18.1",
+    "node-fetch": "^2.6.0",
+    "nodemon": "^2.0.4",
+    "pm2": "^4.4.0",
+    "querystring": "^0.2.0",
+    "redis": "^3.0.2",
+    "request": "^2.88.2",
+    "sync-mysql": "^3.0.1",
+    "sync-request": "^6.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
